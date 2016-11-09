@@ -1,0 +1,59 @@
+##############################################################################
+# Display a two-line prompt with a line stretching over the full terminal
+# width to make it easier to spot different results of commands.
+# - Truncates pwd to a max length depending on the terminal column width
+# - Set the window title to contain user/host/truncated pwd
+# - Print non-zero return code in red
+# - Change color/shape of prompt in case of root user
+# - Continuation prompt in case of multi-line input
+#
+# The prompt will use a style on the form
+#
+# <user>@<host>: <truncated PWD> <bash-git-prompt-info>
+# <exit status> $
+#
+# Example output
+#╭─┤stephankn@host: ~/bash-git-prompt/themes├────┤SepararatorLineTheme L│…1├─────────
+#╰─➤ $ 
+#
+# The window title will have the form
+# user@host: (<truncated PWD>) [<window dimension>]
+#
+# Example usage:
+# if [ -f ~/.bash-git-prompt/gitprompt.sh ]; then
+#   GIT_PROMPT_THEME=SeparatorLine
+#   source ~/.bash-git-prompt/gitprompt.sh
+# fi
+#
+##############################################################################
+override_git_prompt_colors() {
+  GIT_PROMPT_THEME_NAME="SeparatorLine"
+
+  #Overrides the prompt_callback function used by bash-git-prompt
+  function prompt_callback {
+    local LINE400="────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────"
+    gp_set_window_title "\u@\h: (\w) [${COLUMNS}x${LINES}]"
+    local USERCOLOR="${White}"
+    [[ $UID -eq 0 ]] && USERCOLOR="${BoldRed}"
+    echo -n "${DimWhite}${LINE400:0:COLUMNS}\033[G╭─┤${USERCOLOR}\u${BrightBlack}@${White}\h: ${Yellow}$(gp_truncate_pwd)${DimWhite}├──"
+  }
+
+  local gp_end="\n${DimWhite}╰─_LAST_COMMAND_INDICATOR_${ResetColor}"
+
+  GIT_PROMPT_START_USER=""
+  GIT_PROMPT_END_USER="${gp_end} $ "
+  GIT_PROMPT_END_ROOT="${gp_end} ${BoldRed}# "
+
+  GIT_PROMPT_LEADING_SPACE=0
+  GIT_PROMPT_PREFIX="──┤"
+  GIT_PROMPT_SUFFIX="${DimWhite}├──"
+  GIT_PROMPT_SEPARATOR="${DimWhite}│"
+  GIT_PROMPT_STAGED="${Red}● "          # the number of staged files/directories
+  GIT_PROMPT_CLEAN="${BoldGreen}✔ "     # a colored flag indicating a "clean" repo
+  GIT_PROMPT_COMMAND_OK="➤"    # indicator if the last command returned with an exit code of 0
+  GIT_PROMPT_COMMAND_FAIL="${Red}➤ -_LAST_COMMAND_STATE_"
+
+  PS2="${DimWhite}╰─➤ ${ResetColor}"
+}
+
+reload_git_prompt_colors "SeparatorLine"
