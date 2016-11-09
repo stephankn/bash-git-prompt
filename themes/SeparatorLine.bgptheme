@@ -2,7 +2,7 @@
 # Display a two-line prompt with a line stretching over the full terminal
 # width to make it easier to spot different results of commands.
 # - Truncates pwd to a max length depending on the terminal column width
-# - Set the window title to contain user/host/truncated pwd
+# - Set the window title to contain user/host/pwd
 # - Print non-zero return code in red
 # - Change color/shape of prompt in case of root user
 # - Continuation prompt in case of multi-line input
@@ -14,10 +14,10 @@
 #
 # Example output
 #╭─┤stephankn@host: ~/bash-git-prompt/themes├────┤SepararatorLineTheme L│…1├─────────
-#╰─➤ $ 
+#╰─➤ $
 #
 # The window title will have the form
-# user@host: (<truncated PWD>) [<window dimension>]
+# user@host: (<PWD>) [<window dimension>]
 #
 # Example usage:
 # if [ -f ~/.bash-git-prompt/gitprompt.sh ]; then
@@ -32,10 +32,21 @@ override_git_prompt_colors() {
   #Overrides the prompt_callback function used by bash-git-prompt
   function prompt_callback {
     local LINE400="────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────"
+    # construct a temporary string to determine the length of
+    # the prompt. This helps to maximize display of pwd before truncate.
+    # remove color codes with limited regex support in bash
+    local promptCnt="╭─┤${USER}@${HOSTNAME}: ├──${STATUS}"
+    pattern='\\\[\\033\[[0-9];[0-9][0-9]m\\]'
+    promptCnt=${promptCnt//$pattern}
+    pattern='\\\[\\033\[[0-9];[0-9]m\\]'
+    promptCnt=${promptCnt//$pattern}
+    local len=$((${COLUMNS}-${#promptCnt}))
+
+    # todo: check whether to also truncate window title pwd
     gp_set_window_title "\u@\h: (\w) [${COLUMNS}x${LINES}]"
     local USERCOLOR="${White}"
     [[ $UID -eq 0 ]] && USERCOLOR="${BoldRed}"
-    echo -n "${DimWhite}${LINE400:0:COLUMNS}\033[G╭─┤${USERCOLOR}\u${BrightBlack}@${White}\h: ${Yellow}$(gp_truncate_pwd)${DimWhite}├──"
+    echo -n "${DimWhite}${LINE400:0:COLUMNS}\033[G╭─┤${USERCOLOR}\u${BrightBlack}@${White}\h: ${Yellow}$(gp_truncate_pwd $len)${DimWhite}├──"
   }
 
   local gp_end="\n${DimWhite}╰─_LAST_COMMAND_INDICATOR_${ResetColor}"
