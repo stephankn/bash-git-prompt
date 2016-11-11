@@ -17,6 +17,7 @@ remote branch.  It can be empty, or one of:
     ${GIT_PROMPT_BRANCH}${ResetColor}${GIT_PROMPT_REMOTE}${GIT_PROMPT_SYMBOLS_AHEAD}N${ResetColor} - ahead of remote by N commits
     ${GIT_PROMPT_BRANCH}${ResetColor}${GIT_PROMPT_REMOTE}${GIT_PROMPT_SYMBOLS_BEHIND}M${ResetColor} - behind remote by M commits
     ${GIT_PROMPT_BRANCH}${ResetColor}${GIT_PROMPT_REMOTE}${GIT_PROMPT_SYMBOLS_AHEAD}N${GIT_PROMPT_SYMBOLS_BEHIND}M${ResetColor} - branches diverged, other by M commits, yours by N commits
+    ${GIT_PROMPT_BRANCH}${ResetColor}${GIT_PROMPT_REMOTE}${GIT_PROMPT_SYMBOLS_NO_REMOTE_TRACKING} - local branch, not remotely tracked
 
 LOCALSTATUS is one of the following:
 
